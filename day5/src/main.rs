@@ -18,6 +18,39 @@ fn is_nice(input: &str) -> bool {
     !re_bad.is_match(input)
 }
 
+fn is_nice2(input: &str) -> bool {
+    let enumerated_str: Vec<(usize, char)> = input.chars().enumerate().collect();
+
+    // double pair
+    let mut double_pair = false;
+    for win in enumerated_str.windows(2) {
+        let mut search_str = win[0].1.to_string();
+        search_str.push(win[1].1);
+        let rindex = input.rfind(&search_str);
+        match rindex {
+            None => continue,
+            Some(x) => if x == win[0].0 || x == win[0].0 + 1 { // same index or overlapping
+                continue;
+            } else {
+                double_pair = true;
+                break;
+            }
+        }
+    }
+    if !double_pair {
+        return false;
+    }
+
+    // xyx pattern
+    for win in enumerated_str.windows(3) {
+        if win[0].1 == win[2].1 {
+            return true;
+        }
+    }
+
+    false
+}
+
 fn main() -> io::Result<()> {
     let file = File::open("/home/rutger/Programming/rust/AOC2015/input/day5.txt")?;
     let reader = BufReader::new(file);
@@ -26,20 +59,11 @@ fn main() -> io::Result<()> {
                     .filter_map(|l| l.ok())
                     .collect();
 
-    /*
-    let s = "aeiouae";
-    println!("{} {}", s, is_nice(s));
-    */
-
     let result = lines.iter().map(|s| is_nice(s)).fold(0, |acc, x| if x { acc + 1 } else { acc });
     println!("result part 1: {}", result);
 
-    /*
-    let result = solve(&dimensions);
-
-    let result = solve_part_2(&dimensions);
+    let result = lines.iter().map(|s| is_nice2(s)).fold(0, |acc, x| if x { acc + 1 } else { acc });
     println!("result part 2: {}", result);
-    */
 
     Ok(())
 }
